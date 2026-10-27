@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>مساعد صوتي محلي مُجهّز للسحابة</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <div class="app">
+    <header class="header">
+      <h1>مساعد صوتي</h1>
+      <div class="status-pill" id="status">جاهز</div>
+    </header>
+    <main class="chat" id="chat"></main>
+    <footer class="footer">
+      <button id="talkBtn" class="talk-btn">🎙️</button>
+      <p class="hint">اضغط وتحدث، سيستمع ويجيب صوتياً تلقائياً</p>
+    </footer>
+  </div>
+  <audio id="player" autoplay></audio>
+  <script src="/static/app.js"></script>
+</body>
+</html>

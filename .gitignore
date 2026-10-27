@@ -1,0 +1,39 @@
+# البيئة
+.env
+.venv/
+venv/
+env/
+
+# بايثون
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# النماذج وملفات مؤقتة (كبيرة جداً)
+models/*
+!models/.gitkeep
+
+tmp/*
+!tmp/.gitkeep
+
+# ملفات صوت مؤقتة
+*.wav
+!assets/.gitkeep
+
+# كاش
+.cache/
+.hf_cache/
+huggingface/
+
+# IDE
+.vscode/
+.idea/
+
+# نظام
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# سجلات
+*.log

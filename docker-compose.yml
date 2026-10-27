@@ -1,0 +1,35 @@
+services:
+  voice-agent:
+    build: .
+    container_name: voice-agent-deploy
+    runtime: nvidia
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+      - OLLAMA_BASE_URL=http://ollama:11434
+      - OLLAMA_MODEL=qwen2.5:7b-instruct
+    volumes:
+      - ./models:/app/models:ro
+      - ./assets:/app/assets
+      - ./tmp:/app/tmp
+      - hf-cache:/app/.cache/huggingface
+    ports:
+      - "8000:8000"
+    depends_on:
+      - ollama
+    restart: unless-stopped
+
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama-local
+    runtime: nvidia
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+    volumes:
+      - ollama:/root/.ollama
+    ports:
+      - "11434:11434"
+    restart: unless-stopped
+
+volumes:
+  ollama:
+  hf-cache:
