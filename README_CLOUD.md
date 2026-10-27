@@ -37,3 +37,21 @@ uvicorn backend.main:app --host 0.0.0.0 --port 8000
 - GPU مع 12GB+ (يفضل 16GB)
 - RAM 16GB+
 - CUDA 12.x
+
+## طبقة الأدوات (Tool Integration Layer)
+
+يدعم النظام الآن استدعاء أدوات خارجية من قِبل النموذج اللغوي (Function Calling + ReAct).
+
+### الأدوات الجاهزة للاختبار
+- `get_current_time(timezone?: string)` – إرجاع الوقت والتاريخ الحاليين
+- `book_appointment(patient_name: string, date: string, time: string, reason?: string)` – يحاكي حجز موعد ويخزنه في الذاكرة
+
+### التحقق من الأدوات
+بعد تشغيل السيرفر افتح: [http://localhost:8000/tools](http://localhost:8000/tools)
+
+### كيفية إضافة أداة جديدة
+1. أضف مخططها في `backend/tools/schemas.py` باستخدام `pydantic` (اختياري)
+2. أضف دالة التنفيذ في `backend/tools/examples.py` أو ملف جديد
+3. سجّلها عبر `registry.register(...)` واربطها بـ `tool_executor.register_pydantic(...)` إن لزم الأمر
+4. سيُسجّل تلقائياً عند استيراد `backend.tools`
+

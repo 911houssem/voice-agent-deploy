@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import asyncio
 import uuid
 import wave
@@ -12,11 +13,15 @@ from .vad import VAD
 from .llm import LLM
 from .loader import loader
 
+# استيراد طبقة الأدوات لضمان تسجيلها
+from . import tools  # noqa
+
 app = FastAPI(title="Voice Agent - Cloud Ready", version="1.0.0")
 
 app.mount("/static", StaticFiles(directory=FRONTEND_DIR), name="static")
 
 llm = LLM()
+
 
 @app.on_event("startup")
 async def startup_event():
@@ -29,12 +34,42 @@ async def startup_event():
         loader.load_tts()
     except Exception as e:
         print(f"[STARTUP][WARN] TTS load failed: {e}")
+    try:
+        from .tools import tool_registry
+        print("[STARTUP] الأدوات المسجلة:")
+        for name, tool in tool_registry.list_tools().items():
+            print(f"  - {name}: {tool.description}")
+    except Exception as e:
+        print(f"[STARTUP][WARN] لم يتم عرض الأدوات: {e}")
     print("[STARTUP] Ready")
+
 
 @app.get("/", response_class=HTMLResponse)
 async def index():
     html_path = FRONTEND_DIR / "index.html"
     return HTMLResponse(content=html_path.read_text(encoding="utf-8"))
+
+
+@app.get("/tools")
+async def list_tools():
+    from .tools import tool_registry
+    result = []
+    for name, tool in tool_registry.list_tools().items():
+        result.append(
+            {
+                "name": tool.name,
+                "description": tool.description,
+                "parameters_schema": tool.parameters_schema,
+                "is_async": tool.is_async,
+            }
+        )
+    return {"count": len(result), "tools": result}
+
+
+@app.get("/health")
+async def health():
+    return {"status": "ok", "cuda": loader.device}
+
 
 @app.websocket("/ws")
 async def ws_endpoint(ws: WebSocket):
@@ -43,7 +78,6 @@ async def ws_endpoint(ws: WebSocket):
     audio_buffer = bytearray()
     recording = False
     silence_frames = 0
-    frame_bytes = int(settings.SAMPLE_RATE * settings.CHUNK_MS / 1000) * 2
     max_silence = int(settings.SILENCE_TIMEOUT_MS / settings.CHUNK_MS)
     max_bytes = int(settings.MAX_UTTERANCE_SEC * settings.SAMPLE_RATE * 2)
 
@@ -102,6 +136,7 @@ async def ws_endpoint(ws: WebSocket):
     except Exception as e:
         await ws.send_json({"type": "error", "msg": str(e)})
 
+
 @app.get("/audio/{name}")
 async def get_audio(name: str):
     path = TMP_DIR / name
@@ -109,6 +144,3 @@ async def get_audio(name: str):
         return {"error": "not found"}
     return FileResponse(path, media_type="audio/wav")
 
-@app.get("/health")
-async def health():
-    return {"status": "ok", "cuda": loader.device}
